@@ -1,0 +1,46 @@
+[project]
+name = "nodewhisper-backend"
+version = "0.1.0"
+description = "Backend service for NodeWhisper, handling API, database, and core logic."
+authors = [
+    { name = "NodeWhisper Team" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy>=2.0",
+    "asyncpg",
+    "pydantic>=2.0",
+    "python-dotenv",
+    "alembic",
+    "passlib[bcrypt]",
+    "pyjwt",
+    "httpx",
+    "redis",
+    "celery",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "black",
+    "isort",
+    "ruff"
+]
+
+[tool.uvicorn]
+reload = true
+host = "0.0.0.0"
+port = 8000
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+line-length = 88
