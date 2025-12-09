@@ -43,8 +43,6 @@ Frontend: React + Tailwind
 
 Backend: Python (FastAPI)
 
-Live Monitoring: WebSocket engine
-
 Data: EVM indexers, Etherscan, Moralis APIs
 
 Reports: Automated PDF/CSV generation
