@@ -41,7 +41,7 @@ Tech Stack (WIP)
 
 Frontend: React + Tailwind
 
-Backend: Python (Flask API)
+Backend: Python (FastAPI)
 
 Live Monitoring: WebSocket engine
 
