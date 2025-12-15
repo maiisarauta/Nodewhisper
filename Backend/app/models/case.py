@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.base import Base
+from app.models.associations import case_wallets
 
 class Case(Base):
     __tablename__ = "cases"
@@ -12,3 +13,9 @@ class Case(Base):
 
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="cases")
+
+    wallets = relationship(
+        "Wallet",
+        secondary=case_wallets,
+        back_populates="cases"
+    )
