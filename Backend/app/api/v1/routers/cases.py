@@ -5,12 +5,13 @@ from sqlalchemy.orm import selectinload
 
 from app.db.session import get_async_session
 from app.api.v1.deps import get_current_user
-from app.models.case import Case, case_wallets
+from app.models.case import Case
+from app.models.case_wallet import CaseWallet
 from app.models.wallet import Wallet
 from app.models.user import User
 from app.api.v1.schemas.case import CaseCreate, CaseOut
 from app.api.v1.schemas.wallet import WalletOut
-from app.api.v1.schemas.case import AttachWalletsSchema
+from app.api.v1.schemas.case_wallet import AttachWalletEvidenceSchema
 
 router = APIRouter(prefix="/cases")
 
@@ -33,50 +34,57 @@ async def create_case(
     return case
 
 @router.post("/{case_id}/wallets")
-async def attach_wallets_to_case(
+async def attach_wallet_to_case(
     case_id: int,
-    payload: AttachWalletsSchema,
+    payload: AttachWalletEvidenceSchema,
     session: AsyncSession = Depends(get_async_session),
 ):
     result = await session.execute(
-        select(Case)
-        .where(Case.id == case_id)
-        .options(selectinload(Case.wallets))
+        select(Case).where(Case.id == case_id)
     )
     case = result.scalar_one_or_none()
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
 
-    wallets_result = await session.execute(
-        select(Wallet).where(Wallet.id.in_(payload.wallet_ids))
+    wallet = await session.get(Wallet, payload.wallet_id)
+    if not wallet:
+        raise HTTPException(status_code=404, detail="Wallet not found")
+
+    link = CaseWallet(
+        case_id=case.id,
+        wallet_id=wallet.id,
+        confidence=payload.confidence,
+        note=payload.note,
+        source=payload.source,
     )
-    wallets = wallets_result.scalars().all()
 
-    if not wallets:
-        raise HTTPException(status_code=404, detail="Wallets not found")
-
-    case.wallets = wallets
-
+    session.add(link)
     await session.commit()
-    return {"message": "Wallets attached"}
 
-@router.get("/{case_id}/wallets", response_model=list[WalletOut])
+    return {"message": "Wallet linked with evidence"}
+
+@router.get("/{case_id}/wallets")
 async def get_case_wallets(
     case_id: int,
     session: AsyncSession = Depends(get_async_session),
-    current_user: User = Depends(get_current_user),
 ):
     result = await session.execute(
-        select(Case)
-        .where(Case.id == case_id)
-        .options(selectinload(Case.wallets))
+        select(CaseWallet)
+        .where(CaseWallet.case_id == case_id)
+        .options(selectinload(CaseWallet.wallet))
     )
-    case = result.scalar_one_or_none()
+    links = result.scalars().all()
 
-    if not case:
-        raise HTTPException(status_code=404, detail="Case not found")
-
-    return case.wallets
+    return [
+        {
+            "wallet": WalletOut.from_orm(link.wallet),
+            "confidence": link.confidence,
+            "note": link.note,
+            "source": link.source,
+            "created_at": link.created_at,
+        }
+        for link in links
+    ]
 
 @router.delete("/{case_id}/wallets/{wallet_id}")
 async def detach_wallet_from_case(
@@ -85,18 +93,16 @@ async def detach_wallet_from_case(
     session: AsyncSession = Depends(get_async_session),
 ):
     result = await session.execute(
-        select(Case)
-        .where(Case.id == case_id)
-        .options(selectinload(Case.wallets))
+        select(CaseWallet).where(
+            CaseWallet.case_id == case_id,
+            CaseWallet.wallet_id == wallet_id,
+        )
     )
-    case = result.scalar_one_or_none()
-    if not case:
-        raise HTTPException(status_code=404, detail="Case not found")
-
-    wallet = next((w for w in case.wallets if w.id == wallet_id), None)
-    if not wallet:
+    link = result.scalar_one_or_none()
+    if not link:
         raise HTTPException(status_code=404, detail="Link not found")
 
-    case.wallets.remove(wallet)
+    await session.delete(link)
     await session.commit()
-    return {"message": "Wallet detached"}
+
+    return {"message": "Wallet evidence removed"}

@@ -13,9 +13,3 @@ class CaseOut(BaseModel):
 
     class Config:
         from_attributes = True
-
-class AttachWallets(BaseModel):
-    wallet_ids: List[int]
-
-class AttachWalletsSchema(BaseModel):
-    wallet_ids: List[int]

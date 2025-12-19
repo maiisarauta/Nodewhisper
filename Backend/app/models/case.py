@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.base import Base
-from app.models.associations import case_wallets
 
 class Case(Base):
     __tablename__ = "cases"
@@ -11,11 +10,15 @@ class Case(Base):
     description = Column(String)
     risk_score = Column(Integer, default=0)
 
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User", back_populates="cases")
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    wallets = relationship(
-        "Wallet",
-        secondary=case_wallets,
+    user = relationship(
+        "User",
         back_populates="cases"
+    )
+
+    wallet_links = relationship(
+        "CaseWallet",
+        back_populates="case",
+        cascade="all, delete-orphan"
     )

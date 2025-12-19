@@ -13,5 +13,14 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
 
-    wallets = relationship("Wallet", back_populates="user")
-    cases = relationship("Case", back_populates="user")
+    wallets = relationship(
+        "Wallet",
+        back_populates="owner",
+        cascade="all, delete-orphan"
+    )
+
+    cases = relationship(
+        "Case",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
