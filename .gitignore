@@ -5,3 +5,7 @@ _pycache_/
 .env
 node_modules/
 dist/
+pytest.ini
+test.db
+.env
+.env.*
