@@ -1,6 +1,13 @@
 import os
 import pytest
 import pytest_asyncio
+
+import os
+
+os.environ["ENV"] = "test"
+os.environ["DATABASE_URL_ASYNC"] = "sqlite+aiosqlite:///:memory:"
+os.environ["DATABASE_URL_SYNC"] = "sqlite:///:memory:"
+
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from app.main import app
@@ -8,10 +15,6 @@ from app.db.base import Base
 from app.db.session import get_async_session
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
-
-os.environ["ENV"] = "test"
-os.environ["DATABASE_URL_ASYNC"] = TEST_DATABASE_URL
-os.environ["DATABASE_URL_SYNC"] = "sqlite:///./test.db"
 
 engine_test = create_async_engine(
     TEST_DATABASE_URL,
@@ -43,7 +46,7 @@ async def prepare_database():
 @pytest_asyncio.fixture
 async def client():
     async with AsyncClient(
- transport=ASGITransport(app=app),
+        transport=ASGITransport(app=app),
         base_url="http://test",
     ) as client:
         yield client

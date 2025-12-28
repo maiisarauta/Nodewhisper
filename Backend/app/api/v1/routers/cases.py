@@ -77,7 +77,7 @@ async def get_case_wallets(
 
     return [
         {
-            "wallet": WalletOut.from_orm(link.wallet),
+            "wallet": WalletOut.model_validate(link.wallet),
             "confidence": link.confidence,
             "note": link.note,
             "source": link.source,

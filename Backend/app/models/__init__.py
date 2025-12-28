@@ -1,6 +1,6 @@
-from .user import User
-from .wallet import Wallet
-from .case import Case
-from .case_wallet import CaseWallet
+from app.models.user import User
+from app.models.wallet import Wallet
+from app.models.case import Case
+from app.models.case_wallet import CaseWallet
 
 __all__ = ["User", "Wallet", "Case"]

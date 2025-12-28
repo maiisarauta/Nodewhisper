@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 
 class CaseCreate(BaseModel):
@@ -11,5 +11,4 @@ class CaseOut(BaseModel):
     description: Optional[str]
     risk_score: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
