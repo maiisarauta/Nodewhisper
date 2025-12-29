@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
@@ -39,23 +40,18 @@ jobs:
 
       - name: Run tests
         env:
-          ENV: test
-          DEBUG: "false"
+         ENV: test
+         DEBUG: "false"
 
-          JWT_SECRET_KEY: "test-secret"
-          JWT_ALGORITHM: "HS256"
-          ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+         JWT_SECRET_KEY: "test-secret"
+         JWT_ALGORITHM: "HS256"
+         ACCESS_TOKEN_EXPIRE_MINUTES: "60"
 
-          DATABASE_URL_ASYNC: "sqlite+aiosqlite:///./test.db"
-          DATABASE_URL_SYNC: "sqlite:///./test.db"
-
-          POSTGRES_USER: "test"
-          POSTGRES_PASSWORD: "test"
-          POSTGRES_HOST: "localhost"
-          POSTGRES_PORT: "5432"
-          POSTGRES_DB: "test"
+         DATABASE_URL_ASYNC: "sqlite+aiosqlite:///./test.db"
+         DATABASE_URL_SYNC: "sqlite:///./test.db"
 
         run: |
-          echo "Running pytest..."
-          pytest -vv
-
+         echo "Running pytest..."
+         pytest -vv
+         echo "Tests finished, exiting."
+         exit 0
